@@ -27,6 +27,11 @@ export const getOrders = async (
             orderDateTo,
             search,
         } = req.query
+   
+        const safePage = Math.max(1, Number(page) || 1);
+        let safeLimit = Number(limit ?? 10);
+        if (!Number.isFinite(safeLimit) || safeLimit < 1) safeLimit = 10;
+        if (safeLimit > 10) safeLimit = 10;
 
         const filters: FilterQuery<Partial<IOrder>> = {}
 
@@ -116,8 +121,8 @@ export const getOrders = async (
 
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(page) - 1) * Number(limit) },
-            { $limit: Number(limit) },
+            { $skip: (safePage - 1) * safeLimit },
+            { $limit: safeLimit },
             {
                 $group: {
                     _id: '$_id',
@@ -133,15 +138,15 @@ export const getOrders = async (
 
         const orders = await Order.aggregate(aggregatePipeline)
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / safeLimit)
 
         res.status(200).json({
             orders,
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: safePage,
+                pageSize: safeLimit,
             },
         })
     } catch (error) {
@@ -157,9 +162,15 @@ export const getOrdersCurrentUser = async (
     try {
         const userId = res.locals.user._id
         const { search, page = 1, limit = 5 } = req.query
+
+        const safePage = Math.max(1, Number(page) || 1);
+        let safeLimit = Number(limit ?? 5);
+        if (!Number.isFinite(safeLimit) || safeLimit < 1) safeLimit = 5;
+        if (safeLimit > 10) safeLimit = 10;
+
         const options = {
-            skip: (Number(page) - 1) * Number(limit),
-            limit: Number(limit),
+            skip: (Number(page) - 1) * safeLimit,
+            limit: safeLimit,
         }
 
         const user = await User.findById(userId)
@@ -205,7 +216,7 @@ export const getOrdersCurrentUser = async (
         }
 
         const totalOrders = orders.length
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / safeLimit)
 
         orders = orders.slice(options.skip, options.skip + options.limit)
 
@@ -214,8 +225,8 @@ export const getOrdersCurrentUser = async (
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: safePage,
+                pageSize: safeLimit,
             },
         })
     } catch (error) {
