@@ -26,8 +26,9 @@ app.use(
 app.use(cookieParser())
 
 app.use(cors({ 
-    origin: process.env.ORIGIN_ALLOW || 'http://localhost:5173',
-    credentials: true 
+    origin: true,
+    credentials: true,  // ← важно!
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 app.use('/images', (_req, res, next) => {
