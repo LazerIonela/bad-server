@@ -15,18 +15,18 @@ import routes from './routes'
 const { PORT = 3000 } = process.env
 const app = express()
 
-const rateLimiter = rateLimit({
+const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: 20,
     standardHeaders: true,
-    legacyHeaders: true,
+    legacyHeaders: false,
 })
-app.use(rateLimiter)
+app.use(limiter)
 
 app.use(cookieParser())
 
 app.use(cors({ 
-    origin: true,
+    origin: process.env.ORIGIN_ALLOW || 'http://localhost:5173',
     credentials: true,  
     methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
