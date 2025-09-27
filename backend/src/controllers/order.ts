@@ -8,6 +8,18 @@ import User from '../models/user'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
+function escapeHtml(s: string = '') {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeRegExp(s: string = '') {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 export const getOrders = async (
     req: Request,
@@ -95,7 +107,7 @@ export const getOrders = async (
         ]
 
         if (search) {
-            const searchRegex = new RegExp(search as string, 'i')
+            const searchRegex = new RegExp(escapeRegExp(String(search)), 'i');
             const searchNumber = Number(search)
 
             const searchConditions: any[] = [{ 'products.title': searchRegex }]
@@ -196,7 +208,7 @@ export const getOrdersCurrentUser = async (
 
         if (search) {
             // если не экранировать то получаем Invalid regular expression: /+1/i: Nothing to repeat
-            const searchRegex = new RegExp(search as string, 'i')
+            const searchRegex = new RegExp(escapeRegExp(String(search)), 'i');
             const searchNumber = Number(search)
             const products = await Product.find({ title: searchRegex })
             const productIds = products.map((product) => product._id)
@@ -293,6 +305,8 @@ export const getOrderCurrentUserByNumber = async (
 }
 
 // POST /product
+
+
 export const createOrder = async (
     req: Request,
     res: Response,
@@ -302,9 +316,9 @@ export const createOrder = async (
         const basket: IProduct[] = []
         const products = await Product.find<IProduct>({})
         const userId = res.locals.user._id
-        const { address, payment, phone, total, email, items, comment } =
+        const { address, payment, phone, total, email, items, comment: rawComment } =
             req.body
-
+        const comment = escapeHtml(String(rawComment ?? ''));
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p) =>(p._id as Types.ObjectId).equals(id as Types.ObjectId))
             if (!product) {
