@@ -15,21 +15,22 @@ import routes from './routes'
 const { PORT = 3000 } = process.env
 const app = express()
 
-app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      limit: 100,
-      standardHeaders: true,
-      legacyHeaders: false,
-}));
+const rateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: true,
+    legacyHeaders: true,
+})
+app.use(rateLimiter)
 
 app.use(cookieParser())
 
 app.use(cors({ 
     origin: true,
     credentials: true,  
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Content-Length']
 }));
 
 app.use('/images', (_req, res, next) => {
