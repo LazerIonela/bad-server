@@ -17,7 +17,7 @@ const app = express()
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 20,
+    limit: 100,
     standardHeaders: true,
     legacyHeaders: false,
 })
@@ -27,10 +27,7 @@ app.use(cookieParser())
 
 app.use(cors({ 
     origin: true,
-    credentials: true,  
-    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    exposedHeaders: ['Content-Length']
+    credentials: true
 }));
 
 app.use('/images', (_req, res, next) => {
