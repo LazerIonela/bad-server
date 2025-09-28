@@ -48,6 +48,7 @@
         "varsIgnorePattern": "^_",
         "caughtErrorsIgnorePattern": "^_"
       }
-    ]
+    ],
+     "import/no-extraneous-dependencies": "off"
   }
 }
