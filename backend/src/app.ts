@@ -15,6 +15,16 @@ import routes from './routes'
 const { PORT = 3000 } = process.env
 const app = express()
 
+app.use(helmet())
+
+app.use(cors({ 
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['Content-Length']
+}));
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 20,
@@ -25,25 +35,7 @@ const limiter = rateLimit({
 app.use(limiter)
 
 app.use(cookieParser())
-
-app.use(cors({ 
-    origin: ['http://localhost:5173', 'http://localhost'],
-    credentials: true,
-    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
-
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-//   res.setHeader('Access-Control-Allow-Credentials', 'true');
-//   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-//   next();
-// });
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-// app.use(serveStatic(path.join(__dirname, 'public')))
-
 app.use(urlencoded({ extended: true }))
 app.use(json())
 
@@ -51,7 +43,6 @@ app.options('*', cors())
 app.use(routes)
 app.use(errors())
 app.use(errorHandler)
-app.use(helmet())
 
 const bootstrap = async () => {
     try {
