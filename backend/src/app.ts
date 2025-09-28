@@ -27,10 +27,10 @@ app.use(limiter)
 app.use(cookieParser())
 
 app.use(cors({ 
-    origin: true,
+    origin: ['http://localhost:5173', 'http://localhost'],
     credentials: true,
     methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // app.use((req, res, next) => {

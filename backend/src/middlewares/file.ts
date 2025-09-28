@@ -1,11 +1,22 @@
 import { Request, Express } from 'express'
+import { existsSync, mkdirSync } from 'fs'
 import multer, { FileFilterCallback } from 'multer'
 import { join } from 'path'
-import crypto from 'crypto'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
 
+const createUploadDirectory = () => {
+    const uploadPath = process.env.UPLOAD_PATH_TEMP
+        ? join(__dirname, `../public/${process.env.UPLOAD_PATH_TEMP}`)
+        : join(__dirname, '../public')
+
+    if (!existsSync(uploadPath)) {
+        mkdirSync(uploadPath, { recursive: true })
+    }
+}
+
+createUploadDirectory()
 const storage = multer.diskStorage({
     destination: (
         _req: Request,
@@ -25,11 +36,10 @@ const storage = multer.diskStorage({
 
     filename: (
         _req: Request,
-        _file: Express.Multer.File,
+        file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        const safeFileName = crypto.randomBytes(16).toString('hex')
-        cb(null, safeFileName)
+        cb(null, file.originalname)
     },
 })
 
@@ -39,7 +49,6 @@ const types = [
     'image/jpeg',
     'image/gif',
     'image/svg+xml',
-    'image/webp',
 ]
 
 const fileFilter = (
