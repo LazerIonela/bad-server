@@ -1,8 +1,7 @@
 import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import { join, extname } from 'path'
-// eslint-disable-next-line import/no-unresolved
-import { v4 as uuidv4 } from 'uuid'
+import crypto from 'crypto'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
@@ -29,8 +28,8 @@ const storage = multer.diskStorage({
         file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        const ext = extname(file.originalname)
-        const safeFileName = `${uuidv4()}${ext}`
+        const ext = extname(file.originalname).toLowerCase().slice(0, 10)
+        const safeFileName = crypto.randomBytes(16).toString('hex') + ext
         cb(null, safeFileName)
     },
 })
