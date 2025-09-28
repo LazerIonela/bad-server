@@ -17,9 +17,10 @@ const app = express()
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: 20,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method !== 'GET',
 })
 app.use(limiter)
 
@@ -32,12 +33,12 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
-app.use('/images', (_req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+//   res.setHeader('Access-Control-Allow-Credentials', 'true');
+//   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+//   next();
+// });
 
 app.use(express.static(path.join(__dirname, 'public')));
 

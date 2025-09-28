@@ -8,7 +8,8 @@ const ALLOWED_MIME_TYPES = [
   'image/jpg',
   'image/jpeg',
   'image/gif',
-  'image/svg+xml'
+  'image/svg+xml',
+  'image/webp',
 ]
 
 const isFilenameSafe = (filename: string): boolean => {
